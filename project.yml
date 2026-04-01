@@ -1,0 +1,69 @@
+name: Ember
+options:
+  bundleIdPrefix: com.ember
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+targets:
+  Ember:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/Ember
+    resources:
+      - Resources
+    settings:
+      base:
+        INFOPLIST_FILE: Resources/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.ember.app
+        PRODUCT_NAME: Ember
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: 1
+        LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
+        SWIFT_OBJC_BRIDGING_HEADER: Sources/Ember/Bridging/Ember-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - vendor/whisper.cpp/include
+          - vendor/whisper.cpp/ggml/include
+        LIBRARY_SEARCH_PATHS:
+          - vendor/whisper.cpp/build-macos/src
+          - vendor/whisper.cpp/build-macos/ggml/src
+          - vendor/whisper.cpp/build-macos/ggml/src/ggml-metal
+          - vendor/whisper.cpp/build-macos/ggml/src/ggml-blas
+        OTHER_LDFLAGS:
+          - "-lc++"
+          - "-lwhisper"
+          - "-lggml"
+          - "-lggml-base"
+          - "-lggml-cpu"
+          - "-lggml-metal"
+          - "-lggml-blas"
+          - "-framework"
+          - "Accelerate"
+          - "-framework"
+          - "Metal"
+          - "-framework"
+          - "MetalKit"
+          - "-framework"
+          - "Foundation"
+          - "-framework"
+          - "CoreML"
+        CLANG_CXX_LANGUAGE_STANDARD: "c++17"
+      configs:
+        debug:
+          SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+        release:
+          SWIFT_OPTIMIZATION_LEVEL: "-O"
+    frameworks:
+      - AVFoundation
+      - Accelerate
+      - Metal
+      - MetalKit
+      - Foundation
+      - CoreML
