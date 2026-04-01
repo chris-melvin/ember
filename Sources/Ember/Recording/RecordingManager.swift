@@ -19,8 +19,11 @@ class RecordingManager: NSObject, ObservableObject {
         return layer
     }
 
+    private let sessionQueue = DispatchQueue(label: "com.ember.capture-session")
+
     func startRecording(outputURL: URL) {
         let session = AVCaptureSession()
+        session.beginConfiguration()
         session.sessionPreset = .high
 
         guard let videoDevice = AVCaptureDevice.default(for: .video),
@@ -47,26 +50,44 @@ class RecordingManager: NSObject, ObservableObject {
         }
         session.addOutput(output)
 
+        session.commitConfiguration()
+
         captureSession = session
         movieOutput = output
 
-        session.startRunning()
-        output.startRecording(to: outputURL, recordingDelegate: self)
-
-        recordingStartTime = Date()
-        isRecording = true
-        elapsedTime = 0
-
         DispatchQueue.main.async {
             self.showPreviewPanel()
-            self.startTimer()
+        }
+
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            session.startRunning()
+
+            // Small delay to let the session fully initialize
+            Thread.sleep(forTimeInterval: 0.3)
+
+            output.startRecording(to: outputURL, recordingDelegate: self)
+
+            DispatchQueue.main.async {
+                self.recordingStartTime = Date()
+                self.isRecording = true
+                self.elapsedTime = 0
+                self.startTimer()
+            }
         }
     }
 
     func stopRecording(completion: @escaping (URL?) -> Void) {
         completionHandler = completion
-        movieOutput?.stopRecording()
-        stopTimer()
+        sessionQueue.async { [weak self] in
+            guard let self else { return }
+            if let output = self.movieOutput, output.isRecording {
+                output.stopRecording()
+            }
+            DispatchQueue.main.async {
+                self.stopTimer()
+            }
+        }
     }
 
     private func showPreviewPanel() {

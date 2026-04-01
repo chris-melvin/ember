@@ -25,10 +25,11 @@ class RecordingPreviewPanel {
 
         let panel = NSPanel(
             contentRect: NSRect(origin: origin, size: NSSize(width: panelWidth, height: panelHeight)),
-            styleMask: [.titled, .nonactivatingPanel, .hudWindow],
+            styleMask: [.titled, .nonactivatingPanel, .utilityWindow],
             backing: .buffered,
             defer: false
         )
+        panel.appearance = NSAppearance(named: .darkAqua)
         panel.level = .floating
         panel.isFloatingPanel = true
         panel.hidesOnDeactivate = false
@@ -46,7 +47,13 @@ class RecordingPreviewPanel {
         contentView.layer?.addSublayer(previewLayer)
 
         // Bottom bar with timer and stop button
-        let bottomBar = NSHostingView(rootView: RecordingControls(recordingManager: recordingManager))
+        let controls = RecordingControls(
+            onStop: { [weak self] in
+                self?.recordingManager?.stopRecording { _ in }
+            },
+            recordingManager: recordingManager!
+        )
+        let bottomBar = NSHostingView(rootView: controls)
         bottomBar.frame = NSRect(x: 0, y: 0, width: panelWidth, height: 44)
         contentView.addSubview(bottomBar)
 
@@ -62,9 +69,8 @@ class RecordingPreviewPanel {
 }
 
 struct RecordingControls: View {
-    weak var recordingManager: RecordingManager?
-    @State private var elapsedTime: TimeInterval = 0
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    let onStop: () -> Void
+    @ObservedObject var recordingManager: RecordingManager
 
     var body: some View {
         HStack {
@@ -72,15 +78,13 @@ struct RecordingControls: View {
                 .fill(.red)
                 .frame(width: 10, height: 10)
 
-            Text(RecordingManager.formattedTime(elapsedTime))
+            Text(RecordingManager.formattedTime(recordingManager.elapsedTime))
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(.white)
 
             Spacer()
 
-            Button(action: {
-                recordingManager?.stopRecording { _ in }
-            }) {
+            Button(action: onStop) {
                 Image(systemName: "stop.circle.fill")
                     .font(.title2)
                     .foregroundStyle(.red)
@@ -90,8 +94,5 @@ struct RecordingControls: View {
         .padding(.horizontal, 12)
         .frame(height: 44)
         .background(.black.opacity(0.8))
-        .onReceive(timer) { _ in
-            elapsedTime = recordingManager?.elapsedTime ?? 0
-        }
     }
 }

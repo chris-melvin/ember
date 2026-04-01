@@ -57,7 +57,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         try? FileManager.default.createDirectory(at: transcriptionsDir, withIntermediateDirectories: true)
 
         let timestamp = Self.timestampFormatter.string(from: Date())
-        let outputURL = recordingsDir.appendingPathComponent("\(timestamp).mp4")
+        let outputURL = recordingsDir.appendingPathComponent("\(timestamp).mov")
 
         recordingManager.startRecording(outputURL: outputURL)
         statusBarController.updateState(.recording)

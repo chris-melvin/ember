@@ -156,7 +156,7 @@ class TranscriptionManager: ObservableObject {
         title: "\(titleFromFilename)"
         date: \(dateStr)
         duration: "\(durationStr)"
-        recording: "[[ember/recordings/\(filename).mp4]]"
+        recording: "[[ember/recordings/\(filename).mov]]"
         tags: [ember/transcript]
         ---
 
