@@ -120,4 +120,4 @@ gh release create v0.2.0 build/release/Ember-0.2.0.dmg --title "v0.2.0" --notes 
 
 ## License
 
-MIT
+All rights reserved. Ember is free to use but the source code is proprietary.
