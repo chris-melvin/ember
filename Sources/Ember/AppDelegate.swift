@@ -35,8 +35,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.toggleRecording()
         }
 
+        recordingManager.onStopRequested = { [weak self] in
+            self?.stopRecording()
+        }
+
         _ = HotkeyManager.checkAccessibilityPermission()
         hotkeyManager.start()
+
+        // Download default whisper model on first launch if none available
+        if !WhisperModelManager.shared.hasAnyModel() {
+            Task {
+                try? await WhisperModelManager.shared.ensureDefaultModel()
+            }
+        }
     }
 
     private static func migrateSettings() {
@@ -65,6 +76,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
+        guard WhisperModelManager.shared.hasAnyModel() else {
+            showAlert(title: "No Whisper Model", message: "A transcription model is required. Please download one in Preferences.")
+            showPreferences()
+            return
+        }
+
         let outputURL = URL(fileURLWithPath: outputPath)
         let recordingsDir = outputURL.appendingPathComponent("ember/recordings", isDirectory: true)
         try? FileManager.default.createDirectory(at: recordingsDir, withIntermediateDirectories: true)
@@ -84,7 +101,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func stopRecording() {
         recordingManager.stopRecording { [weak self] url in
             guard let self, let url else { return }
-            self.recordingManager.showTitlePrompt(on: self.recordingManager) { [weak self] title in
+            self.recordingManager.showTitlePrompt { [weak self] title in
                 guard let self else { return }
                 let finalURL = Self.renameWithTitle(url: url, title: title)
                 self.statusBarController.updateState(.transcribing)
@@ -155,8 +172,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             } catch {
                 await MainActor.run {
                     statusBarController.updateState(.idle)
+                    showTranscriptionError(error)
                 }
-                print("Transcription error: \(error)")
             }
         }
     }
@@ -189,6 +206,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         preferencesWindow = window
+    }
+
+    private func showTranscriptionError(_ error: Error) {
+        let message: String
+        if let whisperError = error as? WhisperError {
+            switch whisperError {
+            case .noModelAvailable:
+                message = "No whisper model found. Please download one in Preferences."
+            case .couldNotInitializeContext:
+                message = "Failed to load the whisper model. Try downloading it again in Preferences."
+            case .transcriptionFailed:
+                message = "Transcription failed. The audio may be too short or corrupted."
+            }
+        } else {
+            message = error.localizedDescription
+        }
+        showAlert(title: "Transcription Error", message: message)
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
     }
 
     private static let timestampFormatter: DateFormatter = {

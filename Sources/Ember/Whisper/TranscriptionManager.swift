@@ -157,12 +157,12 @@ class TranscriptionManager: ObservableObject {
         let dateStr = ISO8601DateFormatter().string(from: Date())
         let displayTitle = title ?? filename.replacingOccurrences(of: "-", with: " ")
         let recordingFilename = recordingURL.lastPathComponent
-        let obsidianEnabled = UserDefaults.standard.bool(forKey: "obsidianCompatibility")
+        let obsidianEnabled = UserDefaults.standard.object(forKey: "obsidianCompatibility") == nil ? true : UserDefaults.standard.bool(forKey: "obsidianCompatibility")
         let recordingRef: String
         if obsidianEnabled {
             recordingRef = "\"[[ember/recordings/\(recordingFilename)]]\""
         } else {
-            recordingRef = "\"../recordings/\(recordingFilename)\""
+            recordingRef = "../recordings/\(recordingFilename)"
         }
 
         var md = """

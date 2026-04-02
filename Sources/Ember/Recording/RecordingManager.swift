@@ -9,10 +9,13 @@ enum RecordingMode: String {
 class RecordingManager: NSObject, ObservableObject {
     private var captureSession: AVCaptureSession?
     private var movieOutput: AVCaptureMovieFileOutput?
+    private var audioFileOutput: AVCaptureAudioFileOutput?
     private var previewPanel: RecordingPreviewPanel?
     private var completionHandler: ((URL?) -> Void)?
     private var recordingStartTime: Date?
     private var timer: Timer?
+    private var currentOutputURL: URL?
+    private var isAudioOnlyRecording = false
 
     @Published var isRecording = false
     @Published var elapsedTime: TimeInterval = 0
@@ -27,6 +30,10 @@ class RecordingManager: NSObject, ObservableObject {
         }
     }
 
+    // External stop handler — set by AppDelegate so the panel stop button
+    // goes through the same flow as hotkey/menu stop.
+    var onStopRequested: (() -> Void)?
+
     private let sessionQueue = DispatchQueue(label: "com.ember.capture-session")
 
     func startRecording(outputURL: URL) {
@@ -34,6 +41,8 @@ class RecordingManager: NSObject, ObservableObject {
         session.beginConfiguration()
 
         let isAudioOnly = recordingMode == .audioOnly
+        isAudioOnlyRecording = isAudioOnly
+        currentOutputURL = outputURL
 
         if !isAudioOnly {
             session.sessionPreset = .high
@@ -54,18 +63,29 @@ class RecordingManager: NSObject, ObservableObject {
         }
         session.addInput(audioInput)
 
-        let output = AVCaptureMovieFileOutput()
-        output.maxRecordedDuration = .indefinite
-        guard session.canAddOutput(output) else {
-            print("Failed to add movie output")
-            return
+        if isAudioOnly {
+            let audioOutput = AVCaptureAudioFileOutput()
+            guard session.canAddOutput(audioOutput) else {
+                print("Failed to add audio output")
+                return
+            }
+            session.addOutput(audioOutput)
+            audioFileOutput = audioOutput
+            movieOutput = nil
+        } else {
+            let output = AVCaptureMovieFileOutput()
+            output.maxRecordedDuration = .indefinite
+            guard session.canAddOutput(output) else {
+                print("Failed to add movie output")
+                return
+            }
+            session.addOutput(output)
+            movieOutput = output
+            audioFileOutput = nil
         }
-        session.addOutput(output)
 
         session.commitConfiguration()
-
         captureSession = session
-        movieOutput = output
 
         DispatchQueue.main.async {
             self.showPreviewPanel(audioOnly: isAudioOnly)
@@ -74,8 +94,19 @@ class RecordingManager: NSObject, ObservableObject {
         sessionQueue.async { [weak self] in
             guard let self else { return }
             session.startRunning()
-            Thread.sleep(forTimeInterval: 0.3)
-            output.startRecording(to: outputURL, recordingDelegate: self)
+
+            // Wait for session to be running before starting file output
+            var attempts = 0
+            while !session.isRunning && attempts < 10 {
+                Thread.sleep(forTimeInterval: 0.05)
+                attempts += 1
+            }
+
+            if isAudioOnly, let audioOutput = self.audioFileOutput {
+                audioOutput.startRecording(to: outputURL, outputFileType: .m4a, recordingDelegate: self)
+            } else if let movieOutput = self.movieOutput {
+                movieOutput.startRecording(to: outputURL, recordingDelegate: self)
+            }
 
             DispatchQueue.main.async {
                 self.recordingStartTime = Date()
@@ -90,18 +121,38 @@ class RecordingManager: NSObject, ObservableObject {
         completionHandler = completion
         sessionQueue.async { [weak self] in
             guard let self else { return }
+
+            var didStop = false
             if let output = self.movieOutput, output.isRecording {
                 output.stopRecording()
+                didStop = true
+            } else if let output = self.audioFileOutput, output.isRecording {
+                output.stopRecording()
+                didStop = true
             }
+
+            if !didStop {
+                // Recording hasn't started yet or already stopped — call completion immediately
+                DispatchQueue.main.async {
+                    self.cleanup()
+                    self.completionHandler?(nil)
+                    self.completionHandler = nil
+                }
+            }
+
             DispatchQueue.main.async {
                 self.stopTimer()
             }
         }
     }
 
-    func showTitlePrompt(on manager: RecordingManager, completion: @escaping (String?) -> Void) {
+    func showTitlePrompt(completion: @escaping (String?) -> Void) {
         DispatchQueue.main.async {
-            self.previewPanel?.showTitlePrompt(completion: { title in
+            guard let panel = self.previewPanel else {
+                completion(nil)
+                return
+            }
+            panel.showTitlePrompt(completion: { title in
                 self.previewPanel?.close()
                 self.previewPanel = nil
                 completion(title)
@@ -116,6 +167,12 @@ class RecordingManager: NSObject, ObservableObject {
             audioOnly: audioOnly
         )
         previewPanel?.showPanel()
+    }
+
+    private func cleanup() {
+        stopTimer()
+        isRecording = false
+        elapsedTime = 0
     }
 
     private func startTimer() {
@@ -144,20 +201,23 @@ class RecordingManager: NSObject, ObservableObject {
 extension RecordingManager: AVCaptureFileOutputRecordingDelegate {
     func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
         captureSession?.stopRunning()
-        captureSession = nil
-        movieOutput = nil
-        isRecording = false
 
-        if let error {
-            print("Recording error: \(error)")
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            self.captureSession = nil
+            self.movieOutput = nil
+            self.audioFileOutput = nil
+            self.isRecording = false
+            self.stopTimer()
+
+            if let error {
+                print("Recording error: \(error)")
                 self.previewPanel?.close()
                 self.previewPanel = nil
+                self.completionHandler?(nil)
+            } else {
+                self.completionHandler?(outputFileURL)
             }
-            completionHandler?(nil)
-        } else {
-            completionHandler?(outputFileURL)
+            self.completionHandler = nil
         }
-        completionHandler = nil
     }
 }

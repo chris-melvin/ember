@@ -57,7 +57,8 @@ class RecordingPreviewPanel {
 
         let controls = RecordingControls(
             onStop: { [weak self] in
-                self?.recordingManager?.stopRecording { _ in }
+                // Route through AppDelegate's stop flow so title prompt + transcription happen
+                self?.recordingManager?.onStopRequested?()
             },
             recordingManager: recordingManager!
         )

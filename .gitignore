@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.moved-aside
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Build products
+build/
+*.o
+*.d
+
+# SwiftPM
+.build/
+Package.resolved
+
+# whisper.cpp build artifacts (keep pre-built libs tracked)
+vendor/whisper.cpp/build/
+!vendor/whisper.cpp/build-macos/
