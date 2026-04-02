@@ -1,31 +1,60 @@
 import SwiftUI
 import ServiceManagement
 
+enum TranscriptFormat: String, CaseIterable, Identifiable {
+    case markdown = "markdown"
+    case plainText = "plainText"
+    case srt = "srt"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .markdown: return "Markdown"
+        case .plainText: return "Plain Text"
+        case .srt: return "SRT Subtitles"
+        }
+    }
+}
+
 struct PreferencesView: View {
-    @AppStorage("vaultPath") private var vaultPath: String = ""
+    @AppStorage("outputFolderPath") private var outputFolderPath: String = ""
     @AppStorage("activeWhisperModel") private var activeModelId: String = "base.en"
+    @AppStorage("transcriptFormat") private var transcriptFormat: String = TranscriptFormat.markdown.rawValue
+    @AppStorage("obsidianCompatibility") private var obsidianCompatibility: Bool = true
     @StateObject private var modelManager = WhisperModelManager.shared
     @State private var launchAtLogin = false
 
     var body: some View {
         Form {
-            Section("Obsidian Vault") {
+            Section("Output Folder") {
                 HStack {
-                    TextField("Vault path", text: $vaultPath)
+                    TextField("Output folder path", text: $outputFolderPath)
                         .textFieldStyle(.roundedBorder)
                     Button("Browse...") {
-                        selectVaultFolder()
+                        selectOutputFolder()
                     }
                 }
-                if !vaultPath.isEmpty {
-                    let exists = FileManager.default.fileExists(atPath: vaultPath)
+                if !outputFolderPath.isEmpty {
+                    let exists = FileManager.default.fileExists(atPath: outputFolderPath)
                     Label(
-                        exists ? "Vault found" : "Path does not exist",
+                        exists ? "Folder found" : "Path does not exist",
                         systemImage: exists ? "checkmark.circle.fill" : "exclamationmark.triangle.fill"
                     )
                     .foregroundStyle(exists ? .green : .red)
                     .font(.caption)
                 }
+            }
+
+            Section("Transcription") {
+                Picker("Transcript format", selection: $transcriptFormat) {
+                    ForEach(TranscriptFormat.allCases) { format in
+                        Text(format.displayName).tag(format.rawValue)
+                    }
+                }
+
+                Toggle("Obsidian compatibility (wikilinks)", isOn: $obsidianCompatibility)
+                    .help("When enabled, recording links use Obsidian [[wikilink]] syntax")
             }
 
             Section("Whisper Model") {
@@ -75,20 +104,20 @@ struct PreferencesView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460, height: 340)
+        .frame(width: 480, height: 420)
         .onAppear {
             launchAtLogin = SMAppService.mainApp.status == .enabled
         }
     }
 
-    private func selectVaultFolder() {
+    private func selectOutputFolder() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.message = "Select your Obsidian vault folder"
+        panel.message = "Select your output folder"
         if panel.runModal() == .OK, let url = panel.url {
-            vaultPath = url.path
+            outputFolderPath = url.path
         }
     }
 

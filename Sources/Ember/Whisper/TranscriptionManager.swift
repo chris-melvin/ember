@@ -5,7 +5,7 @@ class TranscriptionManager: ObservableObject {
     @Published var isTranscribing = false
     @Published var progress: Double = 0
 
-    func transcribe(recordingURL: URL) async throws {
+    func transcribe(recordingURL: URL, title: String? = nil) async throws {
         await MainActor.run {
             isTranscribing = true
             progress = 0
@@ -42,16 +42,19 @@ class TranscriptionManager: ObservableObject {
 
         await MainActor.run { progress = 0.9 }
 
-        // 5. Get segments and write markdown
+        // 5. Get segments and write transcript
         let segments = await whisperContext.getSegments()
         let duration = try await getRecordingDuration(url: recordingURL)
-        try writeTranscriptMarkdown(for: recordingURL, segments: segments, duration: duration)
+        let format = TranscriptFormat(rawValue: UserDefaults.standard.string(forKey: "transcriptFormat") ?? "markdown") ?? .markdown
+        try writeTranscript(for: recordingURL, segments: segments, duration: duration, title: title, format: format)
 
         // 6. Clean up temp WAV
         try? FileManager.default.removeItem(at: wavURL)
 
         await MainActor.run { progress = 1.0 }
     }
+
+    // MARK: - Audio Extraction
 
     private func extractAudio(from videoURL: URL, to outputURL: URL) async throws {
         let asset = AVAsset(url: videoURL)
@@ -120,8 +123,7 @@ class TranscriptionManager: ObservableObject {
             throw WhisperError.transcriptionFailed
         }
         try file.read(into: buffer)
-        let floatArray = Array(UnsafeBufferPointer(start: buffer.floatChannelData![0], count: Int(buffer.frameLength)))
-        return floatArray
+        return Array(UnsafeBufferPointer(start: buffer.floatChannelData![0], count: Int(buffer.frameLength)))
     }
 
     private func getRecordingDuration(url: URL) async throws -> TimeInterval {
@@ -130,50 +132,88 @@ class TranscriptionManager: ObservableObject {
         return CMTimeGetSeconds(duration)
     }
 
-    private func writeTranscriptMarkdown(for recordingURL: URL, segments: [WhisperContext.Segment], duration: TimeInterval) throws {
+    // MARK: - Transcript Writing
+
+    private func writeTranscript(for recordingURL: URL, segments: [WhisperContext.Segment], duration: TimeInterval, title: String?, format: TranscriptFormat) throws {
         let filename = recordingURL.deletingPathExtension().lastPathComponent
         let recordingsDir = recordingURL.deletingLastPathComponent()
-        let vaultEmberDir = recordingsDir.deletingLastPathComponent()
-        let transcriptionsDir = vaultEmberDir.appendingPathComponent("transcriptions", isDirectory: true)
+        let emberDir = recordingsDir.deletingLastPathComponent()
+        let transcriptionsDir = emberDir.appendingPathComponent("transcriptions", isDirectory: true)
         try FileManager.default.createDirectory(at: transcriptionsDir, withIntermediateDirectories: true)
 
-        let transcriptURL = transcriptionsDir.appendingPathComponent("\(filename).md")
+        switch format {
+        case .markdown:
+            try writeMarkdown(to: transcriptionsDir, filename: filename, recordingURL: recordingURL, segments: segments, duration: duration, title: title)
+        case .plainText:
+            try writePlainText(to: transcriptionsDir, filename: filename, segments: segments)
+        case .srt:
+            try writeSRT(to: transcriptionsDir, filename: filename, segments: segments)
+        }
+    }
 
-        let durationMinutes = Int(duration) / 60
-        let durationSeconds = Int(duration) % 60
-        let durationStr = String(format: "%d:%02d", durationMinutes, durationSeconds)
-
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let dateStr = dateFormatter.string(from: Date())
-
-        let titleFromFilename = filename
-            .replacingOccurrences(of: "-", with: " ")
-            .replacingOccurrences(of: "  ", with: " ")
+    private func writeMarkdown(to dir: URL, filename: String, recordingURL: URL, segments: [WhisperContext.Segment], duration: TimeInterval, title: String?) throws {
+        let transcriptURL = dir.appendingPathComponent("\(filename).md")
+        let durationStr = String(format: "%d:%02d", Int(duration) / 60, Int(duration) % 60)
+        let dateStr = ISO8601DateFormatter().string(from: Date())
+        let displayTitle = title ?? filename.replacingOccurrences(of: "-", with: " ")
+        let recordingFilename = recordingURL.lastPathComponent
+        let obsidianEnabled = UserDefaults.standard.bool(forKey: "obsidianCompatibility")
+        let recordingRef: String
+        if obsidianEnabled {
+            recordingRef = "\"[[ember/recordings/\(recordingFilename)]]\""
+        } else {
+            recordingRef = "\"../recordings/\(recordingFilename)\""
+        }
 
         var md = """
         ---
-        title: "\(titleFromFilename)"
+        title: "\(displayTitle)"
         date: \(dateStr)
         duration: "\(durationStr)"
-        recording: "[[ember/recordings/\(filename).mov]]"
+        recording: \(recordingRef)
         tags: [ember/transcript]
         ---
 
         """
 
         for segment in segments {
-            let startTimestamp = formatTimestamp(ms: segment.startMs)
-            md += "\n[\(startTimestamp)]\(segment.text)\n"
+            let ts = formatTimestamp(ms: segment.startMs)
+            md += "\n[\(ts)]\(segment.text)\n"
         }
 
         try md.write(to: transcriptURL, atomically: true, encoding: .utf8)
     }
 
+    private func writePlainText(to dir: URL, filename: String, segments: [WhisperContext.Segment]) throws {
+        let url = dir.appendingPathComponent("\(filename).txt")
+        let text = segments.map { $0.text.trimmingCharacters(in: .whitespaces) }.joined(separator: " ")
+        try text.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    private func writeSRT(to dir: URL, filename: String, segments: [WhisperContext.Segment]) throws {
+        let url = dir.appendingPathComponent("\(filename).srt")
+        var srt = ""
+        for (i, segment) in segments.enumerated() {
+            let startTime = srtTimestamp(ms: segment.startMs)
+            let endTime = srtTimestamp(ms: segment.endMs)
+            srt += "\(i + 1)\n"
+            srt += "\(startTime) --> \(endTime)\n"
+            srt += "\(segment.text.trimmingCharacters(in: .whitespaces))\n\n"
+        }
+        try srt.write(to: url, atomically: true, encoding: .utf8)
+    }
+
     private func formatTimestamp(ms: Int64) -> String {
         let totalSeconds = Int(ms / 1000)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        return String(format: "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
+    }
+
+    private func srtTimestamp(ms: Int64) -> String {
+        let totalMs = Int(ms)
+        let hours = totalMs / 3_600_000
+        let minutes = (totalMs % 3_600_000) / 60_000
+        let seconds = (totalMs % 60_000) / 1_000
+        let millis = totalMs % 1_000
+        return String(format: "%02d:%02d:%02d,%03d", hours, minutes, seconds, millis)
     }
 }

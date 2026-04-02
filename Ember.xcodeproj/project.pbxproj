@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		13CFE27830C41DA6D59BE3CE /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A129682D271F7281599EDD /* HotkeyManager.swift */; };
 		2EDE8D85BB5698387AA5285F /* RecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D19E72047DD3D6D24FD704 /* RecordingManager.swift */; };
+		361420D9D8F62CD9EA162234 /* RecordingEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D9B69A00769008617E056C /* RecordingEntry.swift */; };
 		443C8195F8B55A54362818EB /* EmberApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C762767FEBB19B2A0C007F9D /* EmberApp.swift */; };
 		4F8E5587D43B38F94BEE891B /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3622C9E48451933046137C /* PreferencesView.swift */; };
 		662AA481FB3B883BDE7E904E /* WhisperModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5C75DB08E8DC61CA765C9D /* WhisperModelManager.swift */; };
@@ -16,17 +17,22 @@
 		B3F603CC510DB9AA5B351ABA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6276F09D700DE5AE10609E02 /* AppDelegate.swift */; };
 		CE99434D0D5B3F250B6AB43A /* TranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B455267671662D39E6BEF0B2 /* TranscriptionManager.swift */; };
 		D6546ECBF137727F0273DBFF /* RecordingPreviewPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D9796D354EEF713141AC39 /* RecordingPreviewPanel.swift */; };
+		DA7A6D3EC5342526280C37A5 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3905BE05786FBA33AD1B98 /* LibraryView.swift */; };
 		FA7B5AF157E49BF0B3CE2AA2 /* WhisperContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E1745E9194B6D7E8D0259B /* WhisperContext.swift */; };
+		FCCC8715AB9B782E977D59A9 /* LibraryScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F02980441F33DA9DAB74B2B /* LibraryScanner.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		18D9B69A00769008617E056C /* RecordingEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEntry.swift; sourceTree = "<group>"; };
 		24D9796D354EEF713141AC39 /* RecordingPreviewPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingPreviewPanel.swift; sourceTree = "<group>"; };
 		2A3622C9E48451933046137C /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		42D19E72047DD3D6D24FD704 /* RecordingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingManager.swift; sourceTree = "<group>"; };
+		4A3905BE05786FBA33AD1B98 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		59E1745E9194B6D7E8D0259B /* WhisperContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperContext.swift; sourceTree = "<group>"; };
 		5A5C75DB08E8DC61CA765C9D /* WhisperModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperModelManager.swift; sourceTree = "<group>"; };
 		6276F09D700DE5AE10609E02 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		82A129682D271F7281599EDD /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
+		9F02980441F33DA9DAB74B2B /* LibraryScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryScanner.swift; sourceTree = "<group>"; };
 		B455267671662D39E6BEF0B2 /* TranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionManager.swift; sourceTree = "<group>"; };
 		C41AD0D9235E643D865505AB /* Ember-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Ember-Bridging-Header.h"; sourceTree = "<group>"; };
 		C762767FEBB19B2A0C007F9D /* EmberApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmberApp.swift; sourceTree = "<group>"; };
@@ -69,10 +75,21 @@
 				2A3622C9E48451933046137C /* PreferencesView.swift */,
 				D9225E5E92C642EB9CAF47C5 /* StatusBarController.swift */,
 				ECB05B97EC033D50CE7C5D45 /* Bridging */,
+				9E58D65453D2F46BC5C17D92 /* Library */,
 				0D98CF02900813B523BE2E2F /* Recording */,
 				E8C0CE8B06E79DA32F3F55CD /* Whisper */,
 			);
 			path = Ember;
+			sourceTree = "<group>";
+		};
+		9E58D65453D2F46BC5C17D92 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				9F02980441F33DA9DAB74B2B /* LibraryScanner.swift */,
+				4A3905BE05786FBA33AD1B98 /* LibraryView.swift */,
+				18D9B69A00769008617E056C /* RecordingEntry.swift */,
+			);
+			path = Library;
 			sourceTree = "<group>";
 		};
 		BBC0B4313EBF53B16DC19257 = {
@@ -159,7 +176,10 @@
 				B3F603CC510DB9AA5B351ABA /* AppDelegate.swift in Sources */,
 				443C8195F8B55A54362818EB /* EmberApp.swift in Sources */,
 				13CFE27830C41DA6D59BE3CE /* HotkeyManager.swift in Sources */,
+				FCCC8715AB9B782E977D59A9 /* LibraryScanner.swift in Sources */,
+				DA7A6D3EC5342526280C37A5 /* LibraryView.swift in Sources */,
 				4F8E5587D43B38F94BEE891B /* PreferencesView.swift in Sources */,
+				361420D9D8F62CD9EA162234 /* RecordingEntry.swift in Sources */,
 				2EDE8D85BB5698387AA5285F /* RecordingManager.swift in Sources */,
 				D6546ECBF137727F0273DBFF /* RecordingPreviewPanel.swift in Sources */,
 				B2CEACA0DC94775843D789C3 /* StatusBarController.swift in Sources */,

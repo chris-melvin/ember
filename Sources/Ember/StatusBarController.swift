@@ -12,6 +12,7 @@ class StatusBarController: ObservableObject {
     @Published var appState: AppState = .idle
     var onToggleRecording: (() -> Void)?
     var onOpenPreferences: (() -> Void)?
+    var onOpenLibrary: (() -> Void)?
 
     init() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -47,6 +48,26 @@ class StatusBarController: ObservableObject {
         menu.addItem(headerItem)
         menu.addItem(NSMenuItem.separator())
 
+        // Recording mode submenu
+        let modeSubmenu = NSMenu()
+        let videoItem = NSMenuItem(title: "Video + Audio", action: #selector(setVideoMode), keyEquivalent: "")
+        videoItem.target = self
+        let audioItem = NSMenuItem(title: "Audio Only", action: #selector(setAudioMode), keyEquivalent: "")
+        audioItem.target = self
+
+        let currentMode = RecordingMode(rawValue: UserDefaults.standard.string(forKey: "recordingMode") ?? "videoAndAudio") ?? .videoAndAudio
+        videoItem.state = currentMode == .videoAndAudio ? .on : .off
+        audioItem.state = currentMode == .audioOnly ? .on : .off
+
+        modeSubmenu.addItem(videoItem)
+        modeSubmenu.addItem(audioItem)
+
+        let modeItem = NSMenuItem(title: "Recording Mode", action: nil, keyEquivalent: "")
+        modeItem.submenu = modeSubmenu
+        menu.addItem(modeItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         let recordTitle: String
         switch appState {
         case .idle:
@@ -63,6 +84,11 @@ class StatusBarController: ObservableObject {
         menu.addItem(recordItem)
 
         menu.addItem(NSMenuItem.separator())
+
+        let libraryItem = NSMenuItem(title: "Library", action: #selector(openLibrary), keyEquivalent: "l")
+        libraryItem.keyEquivalentModifierMask = [.command]
+        libraryItem.target = self
+        menu.addItem(libraryItem)
 
         let prefsItem = NSMenuItem(title: "Preferences...", action: #selector(openPreferences), keyEquivalent: ",")
         prefsItem.target = self
@@ -81,5 +107,19 @@ class StatusBarController: ObservableObject {
 
     @objc private func openPreferences() {
         onOpenPreferences?()
+    }
+
+    @objc private func openLibrary() {
+        onOpenLibrary?()
+    }
+
+    @objc private func setVideoMode() {
+        UserDefaults.standard.set(RecordingMode.videoAndAudio.rawValue, forKey: "recordingMode")
+        setupMenu()
+    }
+
+    @objc private func setAudioMode() {
+        UserDefaults.standard.set(RecordingMode.audioOnly.rawValue, forKey: "recordingMode")
+        setupMenu()
     }
 }

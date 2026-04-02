@@ -1,6 +1,11 @@
 import AVFoundation
 import AppKit
 
+enum RecordingMode: String {
+    case videoAndAudio = "videoAndAudio"
+    case audioOnly = "audioOnly"
+}
+
 class RecordingManager: NSObject, ObservableObject {
     private var captureSession: AVCaptureSession?
     private var movieOutput: AVCaptureMovieFileOutput?
@@ -12,11 +17,14 @@ class RecordingManager: NSObject, ObservableObject {
     @Published var isRecording = false
     @Published var elapsedTime: TimeInterval = 0
 
-    var videoPreviewLayer: AVCaptureVideoPreviewLayer? {
-        guard let session = captureSession else { return nil }
-        let layer = AVCaptureVideoPreviewLayer(session: session)
-        layer.videoGravity = .resizeAspectFill
-        return layer
+    var recordingMode: RecordingMode {
+        get {
+            RecordingMode(rawValue: UserDefaults.standard.string(forKey: "recordingMode") ?? "videoAndAudio") ?? .videoAndAudio
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: "recordingMode")
+            objectWillChange.send()
+        }
     }
 
     private let sessionQueue = DispatchQueue(label: "com.ember.capture-session")
@@ -24,15 +32,19 @@ class RecordingManager: NSObject, ObservableObject {
     func startRecording(outputURL: URL) {
         let session = AVCaptureSession()
         session.beginConfiguration()
-        session.sessionPreset = .high
 
-        guard let videoDevice = AVCaptureDevice.default(for: .video),
-              let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
-              session.canAddInput(videoInput) else {
-            print("Failed to set up video input")
-            return
+        let isAudioOnly = recordingMode == .audioOnly
+
+        if !isAudioOnly {
+            session.sessionPreset = .high
+            guard let videoDevice = AVCaptureDevice.default(for: .video),
+                  let videoInput = try? AVCaptureDeviceInput(device: videoDevice),
+                  session.canAddInput(videoInput) else {
+                print("Failed to set up video input")
+                return
+            }
+            session.addInput(videoInput)
         }
-        session.addInput(videoInput)
 
         guard let audioDevice = AVCaptureDevice.default(for: .audio),
               let audioInput = try? AVCaptureDeviceInput(device: audioDevice),
@@ -56,16 +68,13 @@ class RecordingManager: NSObject, ObservableObject {
         movieOutput = output
 
         DispatchQueue.main.async {
-            self.showPreviewPanel()
+            self.showPreviewPanel(audioOnly: isAudioOnly)
         }
 
         sessionQueue.async { [weak self] in
             guard let self else { return }
             session.startRunning()
-
-            // Small delay to let the session fully initialize
             Thread.sleep(forTimeInterval: 0.3)
-
             output.startRecording(to: outputURL, recordingDelegate: self)
 
             DispatchQueue.main.async {
@@ -90,15 +99,23 @@ class RecordingManager: NSObject, ObservableObject {
         }
     }
 
-    private func showPreviewPanel() {
-        guard let session = captureSession else { return }
-        previewPanel = RecordingPreviewPanel(captureSession: session, recordingManager: self)
-        previewPanel?.showPanel()
+    func showTitlePrompt(on manager: RecordingManager, completion: @escaping (String?) -> Void) {
+        DispatchQueue.main.async {
+            self.previewPanel?.showTitlePrompt(completion: { title in
+                self.previewPanel?.close()
+                self.previewPanel = nil
+                completion(title)
+            })
+        }
     }
 
-    private func dismissPreviewPanel() {
-        previewPanel?.close()
-        previewPanel = nil
+    private func showPreviewPanel(audioOnly: Bool = false) {
+        previewPanel = RecordingPreviewPanel(
+            captureSession: audioOnly ? nil : captureSession,
+            recordingManager: self,
+            audioOnly: audioOnly
+        )
+        previewPanel?.showPanel()
     }
 
     private func startTimer() {
@@ -131,12 +148,12 @@ extension RecordingManager: AVCaptureFileOutputRecordingDelegate {
         movieOutput = nil
         isRecording = false
 
-        DispatchQueue.main.async {
-            self.dismissPreviewPanel()
-        }
-
         if let error {
             print("Recording error: \(error)")
+            DispatchQueue.main.async {
+                self.previewPanel?.close()
+                self.previewPanel = nil
+            }
             completionHandler?(nil)
         } else {
             completionHandler?(outputFileURL)
