@@ -17,14 +17,14 @@ targets:
     platform: macOS
     sources:
       - Sources/Ember
-    resources:
-      - Resources
+      - path: Resources/Assets.xcassets
+        buildPhase: resources
     settings:
       base:
         INFOPLIST_FILE: Resources/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.ember.app
         PRODUCT_NAME: Ember
-        MARKETING_VERSION: "0.1.0"
+        MARKETING_VERSION: "1.1.0"
         CURRENT_PROJECT_VERSION: 1
         LD_RUNPATH_SEARCH_PATHS: "@executable_path/../Frameworks"
         SWIFT_OBJC_BRIDGING_HEADER: Sources/Ember/Bridging/Ember-Bridging-Header.h

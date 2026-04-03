@@ -40,8 +40,6 @@ The system SHALL populate the library by scanning co-located recording folders f
 - **WHEN** the library loads
 - **THEN** the system scans the `ember/` directory for recording folders, reads each `metadata.json` for metadata, and loads transcript content for search indexing
 
-## ADDED Requirements
-
 ### Requirement: Sidebar date grouping
 The system SHALL group recordings by time period in the sidebar.
 

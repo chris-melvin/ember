@@ -9,35 +9,59 @@
 /* Begin PBXBuildFile section */
 		13CFE27830C41DA6D59BE3CE /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A129682D271F7281599EDD /* HotkeyManager.swift */; };
 		2EDE8D85BB5698387AA5285F /* RecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42D19E72047DD3D6D24FD704 /* RecordingManager.swift */; };
-		361420D9D8F62CD9EA162234 /* RecordingEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D9B69A00769008617E056C /* RecordingEntry.swift */; };
+		3FF97CF209BBFBAE45EC512B /* RecordingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01FC8650AD92C9C8CA479384 /* RecordingStore.swift */; };
 		443C8195F8B55A54362818EB /* EmberApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C762767FEBB19B2A0C007F9D /* EmberApp.swift */; };
+		4A66AA4B74B35E999C25A0E5 /* StorageMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA92C578F4148326BC3B13D /* StorageMigrator.swift */; };
 		4F8E5587D43B38F94BEE891B /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3622C9E48451933046137C /* PreferencesView.swift */; };
 		662AA481FB3B883BDE7E904E /* WhisperModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5C75DB08E8DC61CA765C9D /* WhisperModelManager.swift */; };
+		6686570173E097557D9CFB15 /* RecordingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E53534A518B8903F875F634D /* RecordingListView.swift */; };
+		694AF264E087E52F0040D2A4 /* TagEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1BB5923F351D51D1D75475 /* TagEditorView.swift */; };
+		6A48006FDA82B1E81131F2CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2957CC2D0B069548A041DE63 /* Assets.xcassets */; };
+		7CDA626F5DB46E0646378151 /* Recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F11ED099AC09709F1365E8 /* Recording.swift */; };
+		9E27713AD35954AC01E435D8 /* BottomStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FECEEEFDBB2A2F0D005E7C4F /* BottomStatusBar.swift */; };
+		A49C3C8561225BDB4A84A544 /* PlaybackState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEB5310A83DEB7AAA7EDA9A /* PlaybackState.swift */; };
+		A9938F124FCF05CAF909C58C /* TranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02258D3CA05AC7C97E3EDA1 /* TranscriptView.swift */; };
+		B1A7279695CEE36F85DDF1D1 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33D9A1A56064B109BE47909 /* SidebarView.swift */; };
 		B2CEACA0DC94775843D789C3 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9225E5E92C642EB9CAF47C5 /* StatusBarController.swift */; };
 		B3F603CC510DB9AA5B351ABA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6276F09D700DE5AE10609E02 /* AppDelegate.swift */; };
+		B5009F0B38727D7BFAD86991 /* MainWindowWithStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DCF8274ABF4D7D930287EEE /* MainWindowWithStatusBar.swift */; };
 		CE99434D0D5B3F250B6AB43A /* TranscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B455267671662D39E6BEF0B2 /* TranscriptionManager.swift */; };
 		D6546ECBF137727F0273DBFF /* RecordingPreviewPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24D9796D354EEF713141AC39 /* RecordingPreviewPanel.swift */; };
-		DA7A6D3EC5342526280C37A5 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3905BE05786FBA33AD1B98 /* LibraryView.swift */; };
+		E7D4822179226B8100374524 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 478C0B65AEC6C949C340E32D /* DetailView.swift */; };
+		EE358CB8FF5D3A2EC2C55C29 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94E6A6E4A75383AE3C5B1DEB /* MainWindowView.swift */; };
+		EF52998AD235DAD35189BBBC /* RecordingCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C525CF3DE5C9D2C1A01CA8CA /* RecordingCoordinator.swift */; };
 		FA7B5AF157E49BF0B3CE2AA2 /* WhisperContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E1745E9194B6D7E8D0259B /* WhisperContext.swift */; };
-		FCCC8715AB9B782E977D59A9 /* LibraryScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F02980441F33DA9DAB74B2B /* LibraryScanner.swift */; };
+		FC3227DE8055BA79BAC44E9D /* PlayerContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52AEDBC82E93C57F0AB24F44 /* PlayerContainerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		18D9B69A00769008617E056C /* RecordingEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingEntry.swift; sourceTree = "<group>"; };
+		01FC8650AD92C9C8CA479384 /* RecordingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingStore.swift; sourceTree = "<group>"; };
+		0DCF8274ABF4D7D930287EEE /* MainWindowWithStatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowWithStatusBar.swift; sourceTree = "<group>"; };
 		24D9796D354EEF713141AC39 /* RecordingPreviewPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingPreviewPanel.swift; sourceTree = "<group>"; };
+		2957CC2D0B069548A041DE63 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A3622C9E48451933046137C /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		42D19E72047DD3D6D24FD704 /* RecordingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingManager.swift; sourceTree = "<group>"; };
-		4A3905BE05786FBA33AD1B98 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		478C0B65AEC6C949C340E32D /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
+		52AEDBC82E93C57F0AB24F44 /* PlayerContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerContainerView.swift; sourceTree = "<group>"; };
 		59E1745E9194B6D7E8D0259B /* WhisperContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperContext.swift; sourceTree = "<group>"; };
 		5A5C75DB08E8DC61CA765C9D /* WhisperModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperModelManager.swift; sourceTree = "<group>"; };
 		6276F09D700DE5AE10609E02 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7DEB5310A83DEB7AAA7EDA9A /* PlaybackState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackState.swift; sourceTree = "<group>"; };
 		82A129682D271F7281599EDD /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
-		9F02980441F33DA9DAB74B2B /* LibraryScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryScanner.swift; sourceTree = "<group>"; };
+		94E6A6E4A75383AE3C5B1DEB /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
+		A0F11ED099AC09709F1365E8 /* Recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recording.swift; sourceTree = "<group>"; };
 		B455267671662D39E6BEF0B2 /* TranscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionManager.swift; sourceTree = "<group>"; };
+		BC1BB5923F351D51D1D75475 /* TagEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagEditorView.swift; sourceTree = "<group>"; };
+		C02258D3CA05AC7C97E3EDA1 /* TranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptView.swift; sourceTree = "<group>"; };
 		C41AD0D9235E643D865505AB /* Ember-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Ember-Bridging-Header.h"; sourceTree = "<group>"; };
+		C525CF3DE5C9D2C1A01CA8CA /* RecordingCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingCoordinator.swift; sourceTree = "<group>"; };
 		C762767FEBB19B2A0C007F9D /* EmberApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmberApp.swift; sourceTree = "<group>"; };
 		D1E129474145FB033E3BBB86 /* Ember.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ember.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D33D9A1A56064B109BE47909 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		D9225E5E92C642EB9CAF47C5 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		E53534A518B8903F875F634D /* RecordingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingListView.swift; sourceTree = "<group>"; };
+		FEA92C578F4148326BC3B13D /* StorageMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageMigrator.swift; sourceTree = "<group>"; };
+		FECEEEFDBB2A2F0D005E7C4F /* BottomStatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomStatusBar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -48,6 +72,25 @@
 				24D9796D354EEF713141AC39 /* RecordingPreviewPanel.swift */,
 			);
 			path = Recording;
+			sourceTree = "<group>";
+		};
+		1CD9EEFC4AF5B9B8CDFC56E5 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				A0F11ED099AC09709F1365E8 /* Recording.swift */,
+				01FC8650AD92C9C8CA479384 /* RecordingStore.swift */,
+				FEA92C578F4148326BC3B13D /* StorageMigrator.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		1E9636298D0EA29E156C27A2 /* Playback */ = {
+			isa = PBXGroup;
+			children = (
+				7DEB5310A83DEB7AAA7EDA9A /* PlaybackState.swift */,
+				52AEDBC82E93C57F0AB24F44 /* PlayerContainerView.swift */,
+			);
+			path = Playback;
 			sourceTree = "<group>";
 		};
 		233CA52765D6C49205F221FF /* Products */ = {
@@ -73,28 +116,45 @@
 				C762767FEBB19B2A0C007F9D /* EmberApp.swift */,
 				82A129682D271F7281599EDD /* HotkeyManager.swift */,
 				2A3622C9E48451933046137C /* PreferencesView.swift */,
+				C525CF3DE5C9D2C1A01CA8CA /* RecordingCoordinator.swift */,
 				D9225E5E92C642EB9CAF47C5 /* StatusBarController.swift */,
 				ECB05B97EC033D50CE7C5D45 /* Bridging */,
-				9E58D65453D2F46BC5C17D92 /* Library */,
+				9B6F20956B7F926847EF36A4 /* MainWindow */,
+				1E9636298D0EA29E156C27A2 /* Playback */,
 				0D98CF02900813B523BE2E2F /* Recording */,
+				1CD9EEFC4AF5B9B8CDFC56E5 /* Store */,
 				E8C0CE8B06E79DA32F3F55CD /* Whisper */,
 			);
 			path = Ember;
 			sourceTree = "<group>";
 		};
-		9E58D65453D2F46BC5C17D92 /* Library */ = {
+		9B6F20956B7F926847EF36A4 /* MainWindow */ = {
 			isa = PBXGroup;
 			children = (
-				9F02980441F33DA9DAB74B2B /* LibraryScanner.swift */,
-				4A3905BE05786FBA33AD1B98 /* LibraryView.swift */,
-				18D9B69A00769008617E056C /* RecordingEntry.swift */,
+				FECEEEFDBB2A2F0D005E7C4F /* BottomStatusBar.swift */,
+				478C0B65AEC6C949C340E32D /* DetailView.swift */,
+				94E6A6E4A75383AE3C5B1DEB /* MainWindowView.swift */,
+				0DCF8274ABF4D7D930287EEE /* MainWindowWithStatusBar.swift */,
+				E53534A518B8903F875F634D /* RecordingListView.swift */,
+				D33D9A1A56064B109BE47909 /* SidebarView.swift */,
+				BC1BB5923F351D51D1D75475 /* TagEditorView.swift */,
+				C02258D3CA05AC7C97E3EDA1 /* TranscriptView.swift */,
 			);
-			path = Library;
+			path = MainWindow;
+			sourceTree = "<group>";
+		};
+		9D98621E5DDCF522E77BE025 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2957CC2D0B069548A041DE63 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		BBC0B4313EBF53B16DC19257 = {
 			isa = PBXGroup;
 			children = (
+				9D98621E5DDCF522E77BE025 /* Resources */,
 				545B23EF9E7098C03EAF4161 /* Sources */,
 				233CA52765D6C49205F221FF /* Products */,
 			);
@@ -126,6 +186,7 @@
 			buildConfigurationList = B3B776477B6BBC134545AE38 /* Build configuration list for PBXNativeTarget "Ember" */;
 			buildPhases = (
 				60A89B85028B91AE593FB976 /* Sources */,
+				8B6B0FFA7E15F621C34D6356 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -168,21 +229,43 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		8B6B0FFA7E15F621C34D6356 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6A48006FDA82B1E81131F2CF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		60A89B85028B91AE593FB976 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				B3F603CC510DB9AA5B351ABA /* AppDelegate.swift in Sources */,
+				9E27713AD35954AC01E435D8 /* BottomStatusBar.swift in Sources */,
+				E7D4822179226B8100374524 /* DetailView.swift in Sources */,
 				443C8195F8B55A54362818EB /* EmberApp.swift in Sources */,
 				13CFE27830C41DA6D59BE3CE /* HotkeyManager.swift in Sources */,
-				FCCC8715AB9B782E977D59A9 /* LibraryScanner.swift in Sources */,
-				DA7A6D3EC5342526280C37A5 /* LibraryView.swift in Sources */,
+				EE358CB8FF5D3A2EC2C55C29 /* MainWindowView.swift in Sources */,
+				B5009F0B38727D7BFAD86991 /* MainWindowWithStatusBar.swift in Sources */,
+				A49C3C8561225BDB4A84A544 /* PlaybackState.swift in Sources */,
+				FC3227DE8055BA79BAC44E9D /* PlayerContainerView.swift in Sources */,
 				4F8E5587D43B38F94BEE891B /* PreferencesView.swift in Sources */,
-				361420D9D8F62CD9EA162234 /* RecordingEntry.swift in Sources */,
+				7CDA626F5DB46E0646378151 /* Recording.swift in Sources */,
+				EF52998AD235DAD35189BBBC /* RecordingCoordinator.swift in Sources */,
+				6686570173E097557D9CFB15 /* RecordingListView.swift in Sources */,
 				2EDE8D85BB5698387AA5285F /* RecordingManager.swift in Sources */,
 				D6546ECBF137727F0273DBFF /* RecordingPreviewPanel.swift in Sources */,
+				3FF97CF209BBFBAE45EC512B /* RecordingStore.swift in Sources */,
+				B1A7279695CEE36F85DDF1D1 /* SidebarView.swift in Sources */,
 				B2CEACA0DC94775843D789C3 /* StatusBarController.swift in Sources */,
+				4A66AA4B74B35E999C25A0E5 /* StorageMigrator.swift in Sources */,
+				694AF264E087E52F0040D2A4 /* TagEditorView.swift in Sources */,
+				A9938F124FCF05CAF909C58C /* TranscriptView.swift in Sources */,
 				CE99434D0D5B3F250B6AB43A /* TranscriptionManager.swift in Sources */,
 				FA7B5AF157E49BF0B3CE2AA2 /* WhisperContext.swift in Sources */,
 				662AA481FB3B883BDE7E904E /* WhisperModelManager.swift in Sources */,
@@ -211,7 +294,7 @@
 					"vendor/whisper.cpp/build-macos/ggml/src/ggml-metal",
 					"vendor/whisper.cpp/build-macos/ggml/src/ggml-blas",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.1.0;
 				OTHER_LDFLAGS = (
 					"-lc++",
 					"-lwhisper",
@@ -314,7 +397,7 @@
 					"vendor/whisper.cpp/build-macos/ggml/src/ggml-metal",
 					"vendor/whisper.cpp/build-macos/ggml/src/ggml-blas",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.1.0;
 				OTHER_LDFLAGS = (
 					"-lc++",
 					"-lwhisper",

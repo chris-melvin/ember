@@ -47,10 +47,3 @@ The system SHALL immediately show new recordings in the library after recording 
 #### Scenario: Library updates after recording
 - **WHEN** a recording is saved and the main window is open
 - **THEN** the new recording appears at the top of the recording list
-
-### Requirement: Video+audio capture output
-The system SHALL capture video and audio using AVFoundation and save the output as a `.mov` file.
-
-#### Scenario: Long recording support
-- **WHEN** a recording runs for over 1 hour
-- **THEN** the system continues recording without interruption or data loss

@@ -43,10 +43,3 @@ The system SHALL allow the user to select which whisper model to use for transcr
 #### Scenario: User changes model
 - **WHEN** the user selects a different model in preferences
 - **THEN** subsequent transcriptions use the selected model
-
-### Requirement: Parallel processing for long recordings
-The system SHALL use whisper.cpp's parallel processing capability to split long audio across CPU cores.
-
-#### Scenario: Long recording transcription
-- **WHEN** a recording longer than 10 minutes is transcribed
-- **THEN** the system uses `whisper_full_parallel` to distribute processing across available cores

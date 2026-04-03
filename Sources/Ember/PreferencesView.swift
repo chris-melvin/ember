@@ -1,27 +1,9 @@
 import SwiftUI
 import ServiceManagement
 
-enum TranscriptFormat: String, CaseIterable, Identifiable {
-    case markdown = "markdown"
-    case plainText = "plainText"
-    case srt = "srt"
-
-    var id: String { rawValue }
-
-    var displayName: String {
-        switch self {
-        case .markdown: return "Markdown"
-        case .plainText: return "Plain Text"
-        case .srt: return "SRT Subtitles"
-        }
-    }
-}
-
 struct PreferencesView: View {
     @AppStorage("outputFolderPath") private var outputFolderPath: String = ""
     @AppStorage("activeWhisperModel") private var activeModelId: String = "base.en"
-    @AppStorage("transcriptFormat") private var transcriptFormat: String = TranscriptFormat.markdown.rawValue
-    @AppStorage("obsidianCompatibility") private var obsidianCompatibility: Bool = true
     @StateObject private var modelManager = WhisperModelManager.shared
     @State private var launchAtLogin = false
 
@@ -44,17 +26,6 @@ struct PreferencesView: View {
                     .foregroundStyle(exists ? .green : .red)
                     .font(.caption)
                 }
-            }
-
-            Section("Transcription") {
-                Picker("Transcript format", selection: $transcriptFormat) {
-                    ForEach(TranscriptFormat.allCases) { format in
-                        Text(format.displayName).tag(format.rawValue)
-                    }
-                }
-
-                Toggle("Obsidian compatibility (wikilinks)", isOn: $obsidianCompatibility)
-                    .help("When enabled, recording links use Obsidian [[wikilink]] syntax")
             }
 
             Section("Whisper Model") {

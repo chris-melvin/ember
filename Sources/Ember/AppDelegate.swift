@@ -5,19 +5,20 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarController: StatusBarController!
     var hotkeyManager: HotkeyManager!
-    var recordingManager: RecordingManager!
-    var transcriptionManager: TranscriptionManager!
+    private let coordinator = RecordingCoordinator.shared
+    private var recordingManager: RecordingManager { coordinator.recordingManager }
+    private var transcriptionManager: TranscriptionManager { coordinator.transcriptionManager }
     private var preferencesWindow: NSWindow?
 
     private var libraryWindow: NSWindow?
+    private var currentRecordingFolder: URL?
+    private var currentRecordingTimestamp: String?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         Self.migrateSettings()
 
         statusBarController = StatusBarController()
         hotkeyManager = HotkeyManager()
-        recordingManager = RecordingManager()
-        transcriptionManager = TranscriptionManager()
 
         statusBarController.onToggleRecording = { [weak self] in
             self?.toggleRecording()
@@ -39,7 +40,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.stopRecording()
         }
 
-        _ = HotkeyManager.checkAccessibilityPermission()
+        // Only prompt for accessibility on first launch; check silently after
+        let hasPrompted = UserDefaults.standard.bool(forKey: "hasPromptedAccessibility")
+        if !hasPrompted {
+            _ = HotkeyManager.checkAccessibilityPermission(prompt: true)
+            UserDefaults.standard.set(true, forKey: "hasPromptedAccessibility")
+        }
         hotkeyManager.start()
 
         // Download default whisper model on first launch if none available
@@ -48,6 +54,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 try? await WhisperModelManager.shared.ensureDefaultModel()
             }
         }
+
+        // Migrate old storage format if needed
+        let migrator = StorageMigrator()
+        if migrator.needsMigration() {
+            migrator.showMigrationDialogAndMigrate()
+        }
+
+        // Initial scan for library
+        RecordingStore.shared.scan()
     }
 
     private static func migrateSettings() {
@@ -59,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func toggleRecording() {
-        switch statusBarController.appState {
+        switch coordinator.appState {
         case .idle:
             startRecording()
         case .recording:
@@ -82,20 +97,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        let outputURL = URL(fileURLWithPath: outputPath)
-        let recordingsDir = outputURL.appendingPathComponent("ember/recordings", isDirectory: true)
-        try? FileManager.default.createDirectory(at: recordingsDir, withIntermediateDirectories: true)
-
-        let transcriptionsDir = outputURL.appendingPathComponent("ember/transcriptions", isDirectory: true)
-        try? FileManager.default.createDirectory(at: transcriptionsDir, withIntermediateDirectories: true)
-
         let timestamp = Self.timestampFormatter.string(from: Date())
         let isAudioOnly = recordingManager.recordingMode == .audioOnly
         let ext = isAudioOnly ? "m4a" : "mov"
-        let tempURL = recordingsDir.appendingPathComponent("\(timestamp).\(ext)")
 
-        recordingManager.startRecording(outputURL: tempURL)
-        statusBarController.updateState(.recording)
+        // Create co-located folder for this recording
+        guard let folderURL = RecordingStore.shared.createRecordingFolder(timestamp: timestamp, slug: nil) else {
+            showAlert(title: "Error", message: "Could not create recording folder.")
+            return
+        }
+
+        currentRecordingFolder = folderURL
+        currentRecordingTimestamp = timestamp
+        let recordingURL = folderURL.appendingPathComponent("recording.\(ext)")
+
+        recordingManager.startRecording(outputURL: recordingURL)
+        updateAppState(.recording)
     }
 
     private func stopRecording() {
@@ -103,24 +120,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self, let url else { return }
             self.recordingManager.showTitlePrompt { [weak self] title in
                 guard let self else { return }
-                let finalURL = Self.renameWithTitle(url: url, title: title)
-                self.statusBarController.updateState(.transcribing)
-                self.transcribeRecording(at: finalURL, title: title)
+                let folderURL = self.renameRecordingFolder(title: title)
+                let isAudioOnly = self.recordingManager.recordingMode == .audioOnly
+                let type: RecordingMetadata.RecordingType = isAudioOnly ? .audio : .video
+
+                // Write initial metadata
+                RecordingStore.shared.writeInitialMetadata(to: folderURL, title: title, type: type)
+
+                // Find the recording file in the (possibly renamed) folder
+                let ext = isAudioOnly ? "m4a" : "mov"
+                let recordingURL = folderURL.appendingPathComponent("recording.\(ext)")
+
+                self.updateAppState(.transcribing)
+                self.transcribeRecording(at: recordingURL, title: title, folderURL: folderURL)
+                self.currentRecordingFolder = nil
+                self.currentRecordingTimestamp = nil
             }
         }
     }
 
-    private static func renameWithTitle(url: URL, title: String?) -> URL {
-        guard let title, !title.trimmingCharacters(in: .whitespaces).isEmpty else { return url }
+    private func renameRecordingFolder(title: String?) -> URL {
+        guard let folderURL = currentRecordingFolder,
+              let timestamp = currentRecordingTimestamp,
+              let title, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return currentRecordingFolder ?? URL(fileURLWithPath: "/")
+        }
         let slug = Self.slugify(title)
-        guard !slug.isEmpty else { return url }
-        let dir = url.deletingLastPathComponent()
-        let ext = url.pathExtension
-        let baseName = url.deletingPathExtension().lastPathComponent
-        let newName = "\(baseName)-\(slug).\(ext)"
-        let newURL = dir.appendingPathComponent(newName)
-        try? FileManager.default.moveItem(at: url, to: newURL)
-        return newURL
+        guard !slug.isEmpty else { return folderURL }
+        let parentDir = folderURL.deletingLastPathComponent()
+        let newFolderURL = parentDir.appendingPathComponent("\(timestamp)-\(slug)", isDirectory: true)
+        if !FileManager.default.fileExists(atPath: newFolderURL.path) {
+            try? FileManager.default.moveItem(at: folderURL, to: newFolderURL)
+            return newFolderURL
+        }
+        return folderURL
     }
 
     private static func slugify(_ title: String) -> String {
@@ -146,32 +179,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.activate(ignoringOtherApps: true)
             return
         }
-        let libraryView = LibraryView()
+
+        let mainView = MainWindowWithStatusBar(
+            coordinator: coordinator,
+            onStopRecording: { [weak self] in
+                self?.stopRecording()
+            }
+        )
+
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 480),
-            styleMask: [.titled, .closable, .resizable],
+            contentRect: NSRect(x: 0, y: 0, width: 960, height: 600),
+            styleMask: [.titled, .closable, .resizable, .miniaturizable],
             backing: .buffered,
             defer: false
         )
-        window.title = "Ember Library"
-        window.contentView = NSHostingView(rootView: libraryView)
+        window.title = "Ember"
+        window.minSize = NSSize(width: 800, height: 500)
+        window.contentView = NSHostingView(rootView: mainView)
         window.center()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         libraryWindow = window
     }
 
-    private func transcribeRecording(at url: URL, title: String? = nil) {
+    private func transcribeRecording(at url: URL, title: String? = nil, folderURL: URL) {
         Task {
             do {
-                try await transcriptionManager.transcribe(recordingURL: url, title: title)
+                try await transcriptionManager.transcribe(recordingURL: url, title: title, folderURL: folderURL)
                 await MainActor.run {
-                    statusBarController.updateState(.idle)
+                    updateAppState(.idle)
                     sendCompletionNotification(for: url)
+                    RecordingStore.shared.scan()
                 }
             } catch {
                 await MainActor.run {
-                    statusBarController.updateState(.idle)
+                    updateAppState(.idle)
                     showTranscriptionError(error)
                 }
             }
@@ -232,6 +274,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.alertStyle = .warning
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+
+    private func updateAppState(_ state: AppState) {
+        coordinator.appState = state
+        statusBarController.updateState(state)
     }
 
     private static let timestampFormatter: DateFormatter = {
